@@ -1,0 +1,783 @@
+swagger: "2.0"
+info:
+  version: 1.0.0
+  title: API социальной сети
+schemes:
+  - http
+basePath: /v1
+produces:
+  - application/json
+consumes:
+  - application/json
+
+paths:
+  /users/{user_id}/friends:
+    post:
+      summary: Добавление друга
+      parameters:
+        - in: path
+          name: user_id
+          type: integer
+          required: true
+        - in: body
+          name: body
+          required: true
+          schema:
+            type: object
+            required:
+              - friend
+            properties:
+              friend:
+                $ref: '#/definitions/FriendUserId'
+      responses:
+        201:
+          description: Результат добавления
+          schema:
+            type: object
+            required:
+              - friend
+              - error
+            properties:
+              friend:
+                $ref: '#/definitions/Friend'
+              error:
+                $ref: '#/definitions/Error'
+    delete:
+      summary: Удаление друга
+      parameters:
+        - in: path
+          name: user_id
+          type: integer
+          required: true
+        - in: body
+          name: body
+          required: true
+          schema:
+            type: object
+            required:
+              - friend
+            properties:
+              friend:
+                $ref: '#/definitions/FriendUserId'
+      responses:
+        204:
+          description: Результат удаления
+          schema:
+            type: object
+            required:
+              - error
+            properties:
+              error:
+                $ref: '#/definitions/Error'
+    get:
+      summary: Просмотр друзей
+      parameters:
+        - in: path
+          name: user_id
+          type: integer
+          required: true
+        - in: query
+          name: page
+          required: false
+          type: number
+          default: 1
+          minimum: 1
+        - in: query
+          name: limit
+          required: false
+          type: number
+          default: 10
+          minimum: 1
+          maximum: 100
+        - in: query
+          name: sort_by
+          required: false
+          type: string
+          default: created_at
+        - in: query
+          name: sort_order
+          required: false
+          type: string
+          default: desc
+      responses:
+        200:
+          description: Список друзей
+          schema:
+            type: object
+            required:
+              - friends
+              - pages
+              - error
+            properties:
+              friends:
+                type: array
+                x-nullable: false
+                items:
+                  $ref: '#/definitions/Friend'
+              pages:
+                type: integer
+                x-nullable: false
+                minimum: 1
+                example: 10
+              error:
+                $ref: '#/definitions/Error'
+
+  /users/{user_id}:
+     get:
+      summary: Просмотр анкеты
+      parameters:
+        - in: path
+          name: user_id
+          type: integer
+          required: true
+      responses:
+        200:
+          description: Анкета пользователя
+          schema:
+            type: object
+            required:
+              - user
+              - error
+            properties:
+              user:
+                $ref: '#/definitions/User'
+              error:
+                $ref: '#/definitions/Error'
+
+  /posts:
+    post:
+      summary: Публикация поста
+      parameters:
+        - in: body
+          name: body
+          required: true
+          schema:
+            type: object
+            required:
+              - post
+            properties:
+              post:
+                $ref: '#/definitions/PostCreate'
+      responses:
+        201:
+          description: Результат публикации
+          schema:
+            type: object
+            required:
+              - post
+              - error
+            properties:
+              post:
+                $ref: '#/definitions/Post'
+              error:
+                $ref: '#/definitions/Error'
+    get:
+      summary: Просмотр ленты постов
+      parameters:
+        - in: query
+          name: user_id
+          type: integer
+          required: false
+        - in: query
+          name: page
+          required: false
+          type: number
+          default: 1
+          minimum: 1
+        - in: query
+          name: limit
+          required: false
+          type: number
+          default: 10
+          minimum: 1
+          maximum: 100
+        - in: query
+          name: sort_by
+          required: false
+          type: string
+          default: updated_at
+        - in: query
+          name: sort_order
+          required: false
+          type: string
+          default: desc
+      responses:
+        200:
+          description: Лента постов
+          schema:
+            type: object
+            required:
+              - posts
+              - pages
+              - error
+            properties:
+              posts:
+                type: array
+                x-nullable: false
+                items:
+                  $ref: '#/definitions/Post'
+              pages:
+                type: integer
+                x-nullable: false
+                minimum: 1
+                example: 10
+              error:
+                $ref: '#/definitions/Error'
+
+  /posts/{post_id}/media:
+    post:
+      summary: Загрузка медиа файлов для постов
+      consumes:
+        - multipart/form-data
+      parameters:
+        - in: path
+          name: post_id
+          type: integer
+          required: true
+        - in: formData
+          name: user_id
+          type: integer
+          required: true
+        - in: formData
+          name: file
+          type: file
+          required: true
+        - in: formData
+          name: description
+          type: string
+          required: false
+      responses:
+        201:
+          description: Результат загрузки
+          schema:
+            type: object
+            required:
+              - media
+              - error
+            properties:
+              media:
+                $ref: '#/definitions/Media'
+              error:
+                $ref: '#/definitions/Error'
+
+  /users/{user_id}/chats:
+    get:
+      summary: Просмотр диалогов и чатов
+      parameters:
+        - in: path
+          name: user_id
+          type: integer
+          required: true
+        - in: query
+          name: page
+          required: false
+          type: number
+          default: 1
+          minimum: 1
+        - in: query
+          name: limit
+          required: false
+          type: number
+          default: 10
+          minimum: 1
+          maximum: 100
+        - in: query
+          name: sort_by
+          required: false
+          type: string
+          default: updated_at
+        - in: query
+          name: sort_order
+          required: false
+          type: string
+          default: desc
+      responses:
+        200:
+          description: Список диалогов и чатов
+          schema:
+            type: object
+            required:
+              - chats
+              - pages
+              - error
+            properties:
+              chats:
+                type: array
+                x-nullable: false
+                items:
+                  $ref: '#/definitions/Chat'
+              pages:
+                type: integer
+                x-nullable: false
+                minimum: 1
+                example: 10
+              error:
+                $ref: '#/definitions/Error'
+
+  /users/{user_id}/chats/{chat_id}:
+    get:
+      summary: Чтение сообщений в диалогах и чатах
+      parameters:
+        - in: path
+          name: user_id
+          type: integer
+          required: true
+        - in: path
+          name: chat_id
+          type: integer
+          required: true
+        - in: query
+          name: page
+          required: false
+          type: number
+          default: 1
+          minimum: 1
+        - in: query
+          name: limit
+          required: false
+          type: number
+          default: 10
+          minimum: 1
+          maximum: 100
+        - in: query
+          name: sort_by
+          required: false
+          type: string
+          default: created_at
+        - in: query
+          name: sort_order
+          required: false
+          type: string
+          default: desc
+      responses:
+        200:
+          description: Сообщения диалога или чата
+          schema:
+            type: object
+            required:
+              - messages
+              - pages
+              - error
+            properties:
+              messages:
+                type: array
+                x-nullable: false
+                items:
+                  $ref: '#/definitions/Message'
+              pages:
+                type: integer
+                x-nullable: false
+                minimum: 1
+                example: 10
+              error:
+                $ref: '#/definitions/Error'
+    post:
+      summary: Отправка сообщений в диалоги и чаты
+      parameters:
+        - in: path
+          name: user_id
+          type: integer
+          required: true
+        - in: path
+          name: chat_id
+          type: integer
+          required: true
+        - in: body
+          name: body
+          required: true
+          schema:
+            type: object
+            required:
+              - message
+            properties:
+              message:
+                $ref: '#/definitions/MessageCreate'
+      responses:
+        201:
+          description: Результат отправки сообщения
+          schema:
+            type: object
+            required:
+              - message
+              - error
+            properties:
+              message:
+                $ref: '#/definitions/Message'
+              error:
+                $ref: '#/definitions/Error'
+
+definitions:
+  Error:
+    type: object
+    x-nullable: true
+    required:
+      - code
+      - message
+    properties:
+      code:
+        type: integer
+        x-nullable: false
+        example: 10404
+      message:
+        type: string
+        x-nullable: false
+        example: User is not found
+  FriendUserId:
+    type: object
+    x-nullable: false
+    required:
+      - user_id
+    properties:
+      user_id:
+        type: integer
+        x-nullable: false
+        example: 12345
+  Friend:
+    type: object
+    x-nullable: false
+    required:
+      - user_id
+      - first_name
+      - last_name
+      - profile_picture
+      - created_at
+    properties:
+      user_id:
+        type: integer
+        x-nullable: false
+        example: 12345
+      first_name:
+        type: string
+        x-nullable: false
+        example: Иван
+      last_name:
+        type: string
+        x-nullable: false
+        example: Иванов
+      profile_picture:
+        type: string
+        x-nullable: true
+        example: https://avatars.githubusercontent.com/u/11739427
+      created_at:
+        type: string
+        format: date-time
+        x-nullable: false
+        example: 2023-11-29T12:34:56.789Z
+  User:
+    type: object
+    x-nullable: false
+    required:
+      - user_id
+      - first_name
+      - last_name
+      - profile_picture
+      - created_at
+    properties:
+      user_id:
+        type: integer
+        x-nullable: false
+        example: 12345
+      first_name:
+        type: string
+        x-nullable: false
+        example: Иван
+      last_name:
+        type: string
+        x-nullable: false
+        example: Иванов
+      profile_picture:
+        type: string
+        x-nullable: true
+        example: https://avatars.githubusercontent.com/u/11739427
+      age:
+        type: integer
+        example: 25
+      gender:
+        type: string
+        example: male
+      country:
+        type: string
+        example: Россия
+      city:
+        type: string
+        example: Москва
+      education:
+        type: array
+        x-nullable: false
+        items:
+          $ref: '#/definitions/Education'
+      job:
+        type: array
+        x-nullable: false
+        items:
+          $ref: '#/definitions/Job'
+      created_at:
+        type: string
+        format: date-time
+        x-nullable: false
+        example: 2023-11-29T12:34:56.789Z
+      updated_at:
+        type: string
+        format: date-time
+        x-nullable: true
+        example: 2023-11-29T23:45:67.890Z
+  Education:
+    type: object
+    x-nullable: false
+    required:
+      - institution
+      - date_from
+    properties:
+      institution:
+        type: string
+        x-nullable: false
+        example: Московский государственный университет
+      faculty:
+        type: string
+        example: Вычислительной математики и кибернетики
+      degree:
+        type: string
+        example: Бакалавр
+      date_from:
+        type: string
+        format: date
+        x-nullable: false
+        example: 2015-09-01
+      date_to:
+        type: string
+        format: date
+        example: 2020-07-10
+  Job:
+    type: object
+    x-nullable: false
+    required:
+      - organization
+      - position
+      - date_from
+    properties:
+      organization:
+        type: string
+        x-nullable: false
+        example: Яндекс
+      department:
+        type: string
+        example: Отдел разработки поисковых систем
+      position:
+        type: string
+        x-nullable: false
+        example: Разработчик
+      date_from:
+        type: string
+        format: date
+        x-nullable: false
+        example: 2015-09-01
+      date_to:
+        type: string
+        format: date
+        example: 2020-07-10
+  PostCreate:
+    type: object
+    x-nullable: false
+    required:
+      - user_id
+      - title
+      - text
+    properties:
+      user_id:
+        type: integer
+        x-nullable: false
+        example: 12345
+      title:
+        type: string
+        x-nullable: false
+        example: Всем привет!
+      text:
+        type: string
+        x-nullable: false
+        example: Привет, меня зовут Ваня. Это мой первый пост!
+  Post:
+    type: object
+    x-nullable: false
+    required:
+      - post_id
+      - title
+      - text
+      - user_id
+      - first_name
+      - last_name
+      - profile_picture
+      - created_at
+    properties:
+      post_id:
+        type: integer
+        x-nullable: false
+        example: 12345
+      title:
+        type: string
+        x-nullable: false
+        example: Всем привет!
+      text:
+        type: string
+        x-nullable: false
+        example: Привет, меня зовут Ваня. Это мой первый пост!
+      user_id:
+        type: integer
+        x-nullable: false
+        example: 12345
+      first_name:
+        type: string
+        x-nullable: false
+        example: Иван
+      last_name:
+        type: string
+        x-nullable: false
+        example: Иванов
+      profile_picture:
+        type: string
+        x-nullable: true
+        example: https://avatars.githubusercontent.com/u/11739427
+      media:
+        type: array
+        x-nullable: false
+        items:
+          $ref: '#/definitions/Media'
+      created_at:
+        type: string
+        format: date-time
+        x-nullable: false
+        example: 2023-11-29T12:34:56.789Z
+      updated_at:
+        type: string
+        format: date-time
+        x-nullable: true
+        example: 2023-11-29T23:45:67.890Z
+  Media:
+    type: object
+    x-nullable: false
+    required:
+      - media_id
+      - url
+      - user_id
+      - created_at
+    properties:
+      media_id:
+        type: integer
+        x-nullable: false
+        example: 12345
+      description:
+        type: string
+        example: Капибары
+      url:
+        type: string
+        x-nullable: false
+        example: https://cdn.britannica.com/99/138899-050-BC3398E2/Capybara.jpg
+      user_id:
+        type: integer
+        x-nullable: false
+        example: 12345
+      created_at:
+        type: string
+        format: date-time
+        x-nullable: false
+        example: 2023-11-29T12:34:56.789Z
+      updated_at:
+        type: string
+        format: date-time
+        x-nullable: true
+        example: 2023-11-29T23:45:67.890Z
+  Chat:
+    type: object
+    x-nullable: false
+    required:
+      - chat_id
+      - is_personal
+      - title
+      - user_id
+      - created_at
+    properties:
+      chat_id:
+        type: integer
+        x-nullable: false
+        example: 12345
+      is_personal:
+        type: boolean
+        x-nullable: false
+        example: true
+      title:
+        type: string
+        x-nullable: false
+        example: Встреча выпускников
+      user_id:
+        type: integer
+        x-nullable: false
+        example: 12345
+      picture:
+        type: string
+        x-nullable: true
+        example: https://avatars.githubusercontent.com/u/11739427
+      created_at:
+        type: string
+        format: date-time
+        x-nullable: false
+        example: 2023-11-29T12:34:56.789Z
+      updated_at:
+        type: string
+        format: date-time
+        x-nullable: true
+        example: 2023-11-29T23:45:67.890Z
+  Message:
+    type: object
+    x-nullable: false
+    required:
+      - message_id
+      - text
+      - user_id
+      - first_name
+      - last_name
+      - profile_picture
+      - created_at
+    properties:
+      message_id:
+        type: integer
+        x-nullable: false
+        example: 12345
+      text:
+        type: string
+        x-nullable: false
+        example: Привет, как дела?
+      user_id:
+        type: integer
+        x-nullable: false
+        example: 12345
+      first_name:
+        type: string
+        x-nullable: false
+        example: Иван
+      last_name:
+        type: string
+        x-nullable: false
+        example: Иванов
+      profile_picture:
+        type: string
+        x-nullable: true
+        example: https://avatars.githubusercontent.com/u/11739427
+      created_at:
+        type: string
+        format: date-time
+        x-nullable: false
+        example: 2023-11-29T12:34:56.789Z
+      updated_at:
+        type: string
+        format: date-time
+        x-nullable: true
+        example: 2023-11-29T23:45:67.890Z
+  MessageCreate:
+    type: object
+    x-nullable: false
+    required:
+      - text
+    properties:
+      text:
+        type: string
+        x-nullable: false
+        example: Привет всем в этом чате!
