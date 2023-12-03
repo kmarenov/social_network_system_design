@@ -1,0 +1,138 @@
+Table users {
+  id integer [primary key]
+  username varchar
+  firstname varchar
+  lastname varchar
+  bio text
+  picture varchar
+  city_id integer
+  created_at timestamp
+  updated_at timestamp
+}
+Ref: users.city_id > cities.id
+
+Table cities {
+  id integer [primary key]
+  country_id integer
+  name varchar
+}
+Ref: cities.country_id > countries.id
+
+Table countries {
+  id integer [primary key]
+  name varchar
+}
+
+Table users_relations {
+  user_id integer [primary key]
+  target_user_id integer [primary key]
+  type enum ('friendship', 'following', 'loving')
+  created_at timestamp
+}
+Ref: users_relations.user_id > users.id
+Ref: users_relations.target_user_id > users.id
+
+Table interests {
+  id integer [primary key]
+  name varchar
+}
+
+Table users_interests {
+  user_id integer [primary key]
+  interest_id integer [primary key]
+}
+Ref: users_interests.user_id > users.id
+Ref: users_interests.interest_id > interests.id
+
+Table posts {
+  id integer [primary key]
+  user_id integer
+  title varchar
+  body text
+  status enum
+  views integer
+  created_at timestamp
+  updated_at timestamp
+}
+Ref: posts.user_id > users.id
+
+Table media {
+  id integer [primary key]
+  user_id integer
+  description text
+  url varchar
+  type enum ('photo', 'audio', 'video')
+  created_at timestamp
+  updated_at timestamp
+}
+Ref: media.user_id > users.id
+
+Table posts_media {
+  post_id integer [primary key]
+  media_id integer [primary key]
+}
+Ref: posts_media.media_id > media.id
+Ref: posts_media.post_id > posts.id
+
+Table hashtags {
+  id integer [primary key]
+  title text
+}
+
+Table posts_hashtags {
+  post_id integer [primary key]
+  hashtag_id integer [primary key]
+}
+Ref: posts_hashtags.hashtag_id > hashtags.id
+Ref: posts_hashtags.post_id > posts.id
+
+Table likes {
+  user_id integer [primary key]
+  post_id integer [primary key]
+  created_at timestamp
+}
+Ref: likes.user_id > users.id
+Ref: likes.post_id > posts.id
+
+Table comments {
+  id integer [primary key]
+  parent_id integer
+  user_id integer
+  post_id integer
+  body text
+  created_at timestamp
+  updated_at timestamp
+}
+Ref: comments.user_id > users.id
+Ref: comments.post_id > posts.id
+Ref: comments.parent_id > comments.id
+
+Table chats {
+  id integer [primary key]
+  title varchar
+}
+
+Table chats_users {
+  chat_id integer [primary key]
+  user_id integer [primary key]
+}
+Ref: chats_users.chat_id > chats.id
+Ref: chats_users.user_id > users.id
+
+Table messages {
+  id integer [primary key]
+  chat_id integer
+  user_id integer
+  body text
+  created_at timestamp
+  updated_at timestamp
+}
+Ref: messages.chat_id > chats.id
+Ref: messages.user_id > users.id
+
+Table messages_users_reads {
+  message_id integer [primary key]
+  user_id integer [primary key]
+}
+Ref: messages_users_reads.message_id > messages.id
+Ref: messages_users_reads.user_id > users.id
